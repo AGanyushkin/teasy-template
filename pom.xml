@@ -250,7 +250,7 @@
                 <run.tests.with.grid>true</run.tests.with.grid>
                 <application.selenium.driver>chrome</application.selenium.driver>
                 <application.platform>android</application.platform>
-                <grid.hub.url>http://localhost:4723/wd/hub</grid.hub.url>
+                <grid.hub.url>http://localhost:4444/wd/hub</grid.hub.url>
             </properties>
         </profile>
 
@@ -260,7 +260,7 @@
                 <run.tests.with.grid>true</run.tests.with.grid>
                 <application.selenium.driver>safari</application.selenium.driver>
                 <application.platform>ios</application.platform>
-                <grid.hub.url>http://localhost:4723/wd/hub</grid.hub.url>
+                <grid.hub.url>http://localhost:4444/wd/hub</grid.hub.url>
             </properties>
         </profile>
 
@@ -270,7 +270,7 @@
                 <run.tests.with.grid>true</run.tests.with.grid>
                 <application.selenium.driver>chrome</application.selenium.driver>
                 <application.platform>ios</application.platform>
-                <grid.hub.url>http://localhost:4723/wd/hub</grid.hub.url>
+                <grid.hub.url>http://localhost:4444/wd/hub</grid.hub.url>
             </properties>
         </profile>
 

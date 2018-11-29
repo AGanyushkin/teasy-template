@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.wiley</groupId>
+    <artifactId>teasy-template</artifactId>
+    <packaging>pom</packaging>
+    <name>teasy-template</name>
+    <version>1.0</version>
+
+    <description>Teasy Template</description>
+    <organization>
+        <name>Wiley</name>
+        <url>http://www.wiley.com</url>
+    </organization>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java-version>1.8</java-version>
+
+        <application.host>wiley.ru</application.host>
+        <application.port>80</application.port>
+        <application.protocol>http://</application.protocol>
+        <application.selenium.timeout>30</application.selenium.timeout>
+        <application.selenium.driver>chrome</application.selenium.driver>
+        <application.platform>windows</application.platform>
+        <run.tests.with.grid>false</run.tests.with.grid>
+        <grid.hub.url>http://localhost:4444/wd/hub</grid.hub.url>
+        <skip.test>true</skip.test>
+        <restart.driver.count>0</restart.driver.count>
+        <invocation.count>1</invocation.count>
+
+        <mavenSurefirePlugin.Xmx>2g</mavenSurefirePlugin.Xmx>
+        <mavenSurefirePlugin.PermSize>256m</mavenSurefirePlugin.PermSize>
+        <mavenSurefirePlugin.MaxPermSize>1024m</mavenSurefirePlugin.MaxPermSize>
+
+        <teasy.version>2.0.6</teasy.version>
+
+        <org.springframework-version>4.2.4.RELEASE</org.springframework-version>
+        <aspectj.version>1.8.5</aspectj.version>
+
+        <environment>QA</environment>
+    </properties>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.19.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <argLine>-Xmx${mavenSurefirePlugin.Xmx}
+                        -XX:PermSize=${mavenSurefirePlugin.PermSize}
+                        -XX:MaxPermSize=${mavenSurefirePlugin.MaxPermSize}
+                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+                        -Dallure.max.title.length=1000
+                    </argLine>
+                    <systemPropertyVariables>
+                        <environment>${environment}</environment>
+                        <application.selenium.driver>${application.selenium.driver}</application.selenium.driver>
+                        <run.tests.with.grid>${run.tests.with.grid}</run.tests.with.grid>
+                        <grid.hub.url>${grid.hub.url}</grid.hub.url>
+                    </systemPropertyVariables>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                        <version>${aspectj.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <source>${java-version}</source>
+                    <target>${java-version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>run-unit-tests</id>
+            <activation>
+                <property>
+                    <name>full</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>run-unit-tests</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>false</skip>
+                                    <excludedGroups>acceptance, smoke, core, implemented, inTesting,
+                                        inDevelopment
+                                    </excludedGroups>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>run-testsuite</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>run-unit-tests</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.10</version>
+                        <configuration>
+                            <argLine>-XX:PermSize=256m -XX:MaxPermSize=1024m</argLine>
+                            <skip>false</skip>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>${testNGPath}</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>example</id>
+            <properties>
+                <environment>DEFAULT</environment>
+                <testNGPath>${basedir}/src/test/resources/testng/example.xml</testNGPath>
+                <run.tests.with.grid>false</run.tests.with.grid>
+                <skip.test>false</skip.test>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-in-ie</id>
+            <properties>
+                <application.selenium.timeout>60</application.selenium.timeout>
+                <application.selenium.driver>ie10</application.selenium.driver>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-in-ie11-grid</id>
+            <properties>
+                <run.tests.with.grid>true</run.tests.with.grid>
+                <application.selenium.timeout>60</application.selenium.timeout>
+                <application.selenium.driver>ie11</application.selenium.driver>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-in-ie10-grid</id>
+            <properties>
+                <run.tests.with.grid>true</run.tests.with.grid>
+                <application.selenium.timeout>60</application.selenium.timeout>
+                <application.selenium.driver>ie10</application.selenium.driver>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-in-ie9-grid</id>
+            <properties>
+                <run.tests.with.grid>true</run.tests.with.grid>
+                <application.selenium.timeout>60</application.selenium.timeout>
+                <application.selenium.driver>ie9</application.selenium.driver>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-in-chrome</id>
+            <properties>
+                <application.selenium.driver>chrome</application.selenium.driver>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-in-gecko</id>
+            <properties>
+                <application.selenium.driver>gecko</application.selenium.driver>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-in-safari</id>
+            <properties>
+                <application.selenium.driver>safari</application.selenium.driver>
+                <application.platform>mac</application.platform>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-on-android</id>
+            <properties>
+                <run.tests.with.grid>true</run.tests.with.grid>
+                <application.selenium.driver>chrome</application.selenium.driver>
+                <application.platform>android</application.platform>
+                <grid.hub.url>http://localhost:4723/wd/hub</grid.hub.url>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-on-ios-safari</id>
+            <properties>
+                <run.tests.with.grid>true</run.tests.with.grid>
+                <application.selenium.driver>safari</application.selenium.driver>
+                <application.platform>ios</application.platform>
+                <grid.hub.url>http://localhost:4723/wd/hub</grid.hub.url>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-on-ios-chrome</id>
+            <properties>
+                <run.tests.with.grid>true</run.tests.with.grid>
+                <application.selenium.driver>chrome</application.selenium.driver>
+                <application.platform>ios</application.platform>
+                <grid.hub.url>http://localhost:4723/wd/hub</grid.hub.url>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-tests-with-grid</id>
+            <properties>
+                <run.tests.with.grid>true</run.tests.with.grid>
+            </properties>
+        </profile>
+
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.wiley</groupId>
+            <artifactId>teasy</artifactId>
+            <version>${teasy.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>codelds</id>
+            <url>https://code.lds.org/nexus/content/groups/main-repo</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <modules>
+        <module>template-base</module>
+        <module>template-tests</module>
+    </modules>
+</project>
